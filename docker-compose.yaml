@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    env_file:
+      - db.env
+    ports:
+      - 27017:27017
+    volumes:
+      - ./init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      # - mongodb_data_container:/data/db
+    restart: always
+  
+  aiprocessor:
+    build:
+      context: app
+      dockerfile: Dockerfile
+    container_name: aiprocessor
+    restart: unless-stopped
+    environment:
+      DISPLAY: :0
+    env_file:
+      - db.env
+    depends_on:
+      - mongodb
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    devices:
+      - /dev/video0:/dev/video0
